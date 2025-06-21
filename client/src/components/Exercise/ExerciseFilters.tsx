@@ -19,9 +19,48 @@ const difficultyOptions = ["Dễ", "Bình thường", "Khó"].map((d) => ({
 type Props = {
   onSearch: (value: string) => void;
   onFilterChange: (filters: any) => void;
+  compact?: boolean;
 };
 
-const ExerciseFilters = ({ onSearch, onFilterChange }: Props) => {
+const ExerciseFilters = ({ onSearch, onFilterChange, compact = false }: Props) => {
+  if (compact) {
+    return (
+      <Space wrap size="small">
+        <Input.Search
+          placeholder="Tìm bài tập..."
+          allowClear
+          onSearch={onSearch}
+          style={{ width: 250 }}
+          size="small"
+        />
+        <Select
+          placeholder="Lớp"
+          allowClear
+          options={gradeOptions}
+          onChange={(val) => onFilterChange({ grade: val })}
+          style={{ width: 100 }}
+          size="small"
+        />
+        <Select
+          placeholder="Môn học"
+          allowClear
+          options={subjectOptions}
+          onChange={(val) => onFilterChange({ subject: val })}
+          style={{ width: 120 }}
+          size="small"
+        />
+        <Select
+          placeholder="Độ khó"
+          allowClear
+          options={difficultyOptions}
+          onChange={(val) => onFilterChange({ difficulty: val })}
+          style={{ width: 120 }}
+          size="small"
+        />
+      </Space>
+    );
+  }
+
   return (
     <Space direction="vertical" size="middle" style={{ width: "100%" }}>
       <Space wrap>

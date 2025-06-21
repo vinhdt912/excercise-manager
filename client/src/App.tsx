@@ -33,16 +33,21 @@
 // }
 
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import {
   DesktopOutlined,
   FileOutlined,
   PieChartOutlined,
   TeamOutlined,
   UserOutlined,
+  BookOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Breadcrumb, ConfigProvider, Layout, Menu, theme } from "antd";
 import ExerciseList from "./components/Exercise/ExerciseList";
+import ExamList from "./components/Exam/ExamList";
+import CreateExamPage from "./components/Exam/CreateExamPage";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -63,26 +68,101 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("Option 1", "1", <PieChartOutlined />),
-  getItem("Option 2", "2", <DesktopOutlined />),
-  getItem("User", "sub1", <UserOutlined />, [
-    getItem("Tom", "3"),
-    getItem("Bill", "4"),
-    getItem("Alex", "5"),
-  ]),
-  getItem("Team", "sub2", <TeamOutlined />, [
-    getItem("Team 1", "6"),
-    getItem("Team 2", "8"),
-  ]),
-  getItem("Files", "9", <FileOutlined />),
+  getItem("Quản lý bài tập", "exercises", <BookOutlined />),
+  getItem("Quản lý đề thi", "exams", <FileOutlined />),
+  getItem("Tạo đề thi", "create-exam", <PlusOutlined />),
 ];
 
-const App: React.FC = () => {
+// Component để xử lý navigation
+function AppContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  // Xác định key hiện tại dựa trên path
+  const getCurrentKey = () => {
+    const path = location.pathname;
+    if (path === "/exercises") return "exercises";
+    if (path === "/exams") return "exams";
+    if (path === "/create-exam") return "create-exam";
+    return "exercises"; // default
+  };
+
+  const handleMenuSelect = ({ key }: { key: string }) => {
+    switch (key) {
+      case "exercises":
+        navigate("/exercises");
+        break;
+      case "exams":
+        navigate("/exams");
+        break;
+      case "create-exam":
+        navigate("/create-exam");
+        break;
+    }
+  };
+
+  return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider
+        collapsible
+        theme="light"
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+      >
+        <div
+          className="demo-logo-vertical"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            margin: "10px 0",
+          }}
+        >
+          <img
+            src={"https://partner.flyer.us/static/images/new-icon.png"}
+            style={{ width: "50%", height: "50%", margin: "0 auto" }}
+            alt="logo"
+          />
+        </div>
+        <Menu 
+          defaultSelectedKeys={["exercises"]} 
+          mode="inline" 
+          items={items}
+          selectedKeys={[getCurrentKey()]}
+          onSelect={handleMenuSelect}
+        />
+      </Sider>
+      <Layout>
+        <Header style={{ padding: 0, background: colorBgContainer }} />
+        <Content
+          style={{
+            padding: 0,
+            margin: 0,
+            minHeight: 280,
+            background: colorBgContainer,
+            borderRadius: borderRadiusLG,
+          }}
+        >
+          <Routes>
+            <Route path="/" element={<ExerciseList />} />
+            <Route path="/exercises" element={<ExerciseList />} />
+            <Route path="/exams" element={<ExamList />} />
+            <Route path="/create-exam" element={<CreateExamPage />} />
+          </Routes>
+        </Content>
+        <Footer style={{ textAlign: "center" }}>
+          Hệ thống quản lý đề thi ©{new Date().getFullYear()}
+        </Footer>
+      </Layout>
+    </Layout>
+  );
+}
+
+const App: React.FC = () => {
   return (
     <ConfigProvider
       theme={{
@@ -94,48 +174,9 @@ const App: React.FC = () => {
         },
       }}
     >
-      <Layout style={{ minHeight: "100vh" }}>
-        <Sider
-          collapsible
-          theme="light"
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
-        >
-          <div
-            className="demo-logo-vertical"
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              margin: "10px 0",
-            }}
-          >
-            <img
-              src={"https://partner.flyer.us/static/images/new-icon.png"}
-              style={{ width: "50%", height: "50%", margin: "0 auto" }}
-              alt="logo"
-            />
-          </div>
-          <Menu defaultSelectedKeys={["1"]} mode="inline" items={items} />
-        </Sider>
-        <Layout>
-          <Header style={{ padding: 0, background: colorBgContainer }} />
-          <Content
-            style={{
-              padding: 24,
-              margin: 0,
-              minHeight: 280,
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}
-          >
-            <ExerciseList />
-          </Content>
-          <Footer style={{ textAlign: "center" }}>
-            Ant Design ©{new Date().getFullYear()} Created by Ant UED
-          </Footer>
-        </Layout>
-      </Layout>
+      <Router>
+        <AppContent />
+      </Router>
     </ConfigProvider>
   );
 };
